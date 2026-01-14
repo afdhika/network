@@ -29,18 +29,33 @@ def main():
 
     for host in hosts:
         status, time_ms = ping_host(host)
+        host_active = False
 
         if status:
+            host_active = True
             print(Fore.GREEN + f"[UP] {host} ({time_ms} ms)")
-            for port in PORTS:
-                result = "OPEN" if check_port(host, port) else "CLOSED"
-                print(f"   └─ Port {port}: {result}")
-                log_result(f"{host} Port {port}: {result}")
         else:
-            print(Fore.RED + f"[DOWN] {host}")
-            log_result(f"{host} DOWN")
+            print(Fore.RED + f"[PING BLOCKED] {host}")
 
-    print(Fore.CYAN + "\nScan completed.")
+        for port in PORTS:
+            port_open = check_port(host, port)
+
+            if port_open:
+                host_active = True
+                print(Fore.YELLOW + f"   └─ Port {port}: OPEN")
+            else:
+                print(Fore.RED + f"   └─ Port {port}: CLOSED")
+
+        if host_active:
+            print(Fore.GREEN + f"   => STATUS: ACTIVE")
+            log_result(f"{host} ACTIVE")
+        else:
+            print(Fore.RED + f"   => STATUS: INACTIVE")
+            log_result(f"{host} INACTIVE")
+
+
+        print()
+
 
 if __name__ == "__main__":
     main()
