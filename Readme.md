@@ -82,19 +82,6 @@ python gui.py
 
 ---
 
-## 🪟 Windows Application
-
-This project is available as a **Windows desktop application**:
-
-- Standalone `.exe` file
-- Custom icon
-- Desktop shortcut
-- Installer-based distribution
-
-📦 **Installer (`NetworkMonitorSetup.exe`) is available upon request**.
-
----
-
 ## 🎯 Use Case Scenarios
 
 This application simulates tasks such as:
