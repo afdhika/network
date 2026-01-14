@@ -15,7 +15,7 @@ class NetworkMonitorGUI(tk.Tk):
         super().__init__()
 
         self.title("Network Monitoring Tool")
-        self.geometry("700x500")
+        self.geometry("750x550")
         self.resizable(False, False)
 
         self.create_widgets()
@@ -30,23 +30,32 @@ class NetworkMonitorGUI(tk.Tk):
         ttk.Radiobutton(frame, text="Hosts File", variable=self.mode, value="file").grid(row=0, column=1)
         ttk.Radiobutton(frame, text="IP Range", variable=self.mode, value="range").grid(row=0, column=2)
 
-        ttk.Label(frame, text="Base IP (for range):").grid(row=1, column=0, sticky="w", pady=5)
+        ttk.Label(frame, text="Base IP:").grid(row=1, column=0, sticky="w", pady=5)
         self.base_ip_entry = ttk.Entry(frame)
         self.base_ip_entry.insert(0, "192.168.1")
         self.base_ip_entry.grid(row=1, column=1, columnspan=2, sticky="we")
 
         self.start_button = ttk.Button(frame, text="Start Scan", command=self.start_scan)
-        self.start_button.grid(row=2, column=0, columnspan=3, pady=10)
+        self.start_button.grid(row=2, column=0, pady=10)
 
-        self.output = tk.Text(self, height=22, bg="black", fg="white")
+        self.status_label = ttk.Label(frame, text="Status: IDLE", foreground="blue")
+        self.status_label.grid(row=2, column=1, columnspan=2)
+
+        self.progress = ttk.Progressbar(self, length=700)
+        self.progress.pack(padx=10, pady=5)
+
+        self.output = tk.Text(self, height=22, bg="#0f172a", fg="white")
         self.output.pack(fill="both", padx=10, pady=5)
 
-    def log(self, text):
+    def log(self, text, color=None):
         self.output.insert(tk.END, text + "\n")
         self.output.see(tk.END)
 
     def start_scan(self):
         self.output.delete(1.0, tk.END)
+        self.start_button.config(state="disabled")
+        self.status_label.config(text="Status: RUNNING", foreground="green")
+
         thread = threading.Thread(target=self.scan)
         thread.start()
 
@@ -65,10 +74,14 @@ class NetworkMonitorGUI(tk.Tk):
                 return
             hosts = generate_ip_range(base_ip)
 
+        total = len(hosts)
+        self.progress["maximum"] = total
+        self.progress["value"] = 0
+
         self.log("=== Network Monitoring Tool ===")
         self.log("Starting scan...\n")
 
-        for host in hosts:
+        for i, host in enumerate(hosts, start=1):
             status, time_ms = ping_host(host)
             host_active = False
 
@@ -92,8 +105,11 @@ class NetworkMonitorGUI(tk.Tk):
                 self.log("   => STATUS: INACTIVE\n")
                 log_result(f"{host} INACTIVE")
 
+            self.progress["value"] = i
             time.sleep(DELAY)
 
+        self.status_label.config(text="Status: DONE", foreground="purple")
+        self.start_button.config(state="normal")
         self.log("Scan completed.")
 
 if __name__ == "__main__":
