@@ -1,5 +1,0 @@
-__pycache__/
-dist/
-build/
-*.spec
-network_log.txt
