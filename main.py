@@ -1,45 +1,46 @@
 from ping_checker import ping_host
 from port_checker import check_port
 from logger import log_result
-from colorama import Fore, Style, init
+from ip_scanner import generate_ip_range
+from colorama import Fore, init
 
 init(autoreset=True)
 
 PORTS = [80, 3306]
 
-def load_hosts():
-    with open("hosts.txt") as f:
-        return [line.strip() for line in f if line.strip()]
-
 def main():
-    hosts = load_hosts()
+    print(Fore.CYAN + "=== Network Monitoring Tool ===")
+    print("1. Scan hosts from hosts.txt")
+    print("2. Scan IP range (example: 192.168.1.1 - 254)\n")
 
-    print(Fore.CYAN + "=== Network Monitoring Tool ===\n")
+    choice = input("Choose mode (1/2): ").strip()
+
+    if choice == "1":
+        with open("hosts.txt") as f:
+            hosts = [line.strip() for line in f if line.strip()]
+    elif choice == "2":
+        base_ip = input("Enter base IP (example 192.168.1): ").strip()
+        hosts = generate_ip_range(base_ip)
+    else:
+        print(Fore.RED + "Invalid choice")
+        return
+
+    print("\nStarting scan...\n")
 
     for host in hosts:
         status, time_ms = ping_host(host)
 
         if status:
-            line = f"[UP] {host} ({time_ms} ms)"
-            print(Fore.GREEN + line)
-            log_result(line)
-
+            print(Fore.GREEN + f"[UP] {host} ({time_ms} ms)")
             for port in PORTS:
-                port_status = check_port(host, port)
-                if port_status:
-                    port_line = f"Port {port}: OPEN"
-                    print(Fore.YELLOW + f"   └─ {port_line}")
-                else:
-                    port_line = f"Port {port}: CLOSED"
-                    print(Fore.RED + f"   └─ {port_line}")
-
-                log_result(f"{host} - {port_line}")
+                result = "OPEN" if check_port(host, port) else "CLOSED"
+                print(f"   └─ Port {port}: {result}")
+                log_result(f"{host} Port {port}: {result}")
         else:
-            line = f"[DOWN] {host}"
-            print(Fore.RED + line)
-            log_result(line)
+            print(Fore.RED + f"[DOWN] {host}")
+            log_result(f"{host} DOWN")
 
-        print()
+    print(Fore.CYAN + "\nScan completed.")
 
 if __name__ == "__main__":
     main()
