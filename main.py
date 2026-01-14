@@ -1,5 +1,6 @@
 from ping_checker import ping_host
 from port_checker import check_port
+from logger import log_result
 
 PORTS = [80, 3306]
 
@@ -16,12 +17,20 @@ def main():
         status, time_ms = ping_host(host)
 
         if status:
-            print(f"[UP]   {host} ({time_ms} ms)")
+            line = f"[UP] {host} ({time_ms} ms)"
+            print(line)
+            log_result(line)
+
             for port in PORTS:
                 port_status = "OPEN" if check_port(host, port) else "CLOSED"
-                print(f"   └─ Port {port}: {port_status}")
+                port_line = f"Port {port}: {port_status}"
+                print(f"   └─ {port_line}")
+                log_result(f"{host} - {port_line}")
         else:
-            print(f"[DOWN] {host}")
+            line = f"[DOWN] {host}"
+            print(line)
+            log_result(line)
+
 
         print()
 
