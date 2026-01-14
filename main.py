@@ -3,6 +3,7 @@ from port_checker import check_port
 from logger import log_result
 from ip_scanner import generate_ip_range
 from colorama import Fore, init
+import time
 
 init(autoreset=True)
 
@@ -53,6 +54,7 @@ def main():
             print(Fore.RED + f"   => STATUS: INACTIVE")
             log_result(f"{host} INACTIVE")
 
+        time.sleep(0.1)
 
         print()
 
