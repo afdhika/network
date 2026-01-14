@@ -52,7 +52,7 @@ To run the project without Python:
 
 📄 Log files are already enabled and will be generated automatically.
 
-Make sure Python 3 is installed:
+Make sure Python 3 is installed if you want use python:
 
 ```bash
 python main.py
