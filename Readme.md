@@ -31,15 +31,6 @@ The application was developed as a **CLI-based tool**, then packaged into a **Wi
 - Records whether hosts are ACTIVE or INACTIVE
 - Useful for monitoring history and troubleshooting
 
-### 📦 Windows Deployment
-- Converted into a standalone Windows executable using **PyInstaller**
-- Custom application icon for branding
-- Distributed via a **Windows installer (setup.exe)** created with **Inno Setup**
-- Installer features:
-  - Guided installation wizard
-  - Optional desktop shortcut
-  - Clean installation directory
-
 ---
 
 ## 🛠️ Technologies Used
@@ -48,29 +39,18 @@ The application was developed as a **CLI-based tool**, then packaged into a **Wi
 - **Socket & Subprocess** (network operations)
 - **Multithreading**
 - **PyInstaller** (EXE packaging)
-- **Inno Setup** (Windows installer creation)
-
----
-
-## 📂 Project Structure
-
-```
-network-monitor/
-├── main.py               # Main CLI application
-├── ping_checker.py       # Ping functionality
-├── port_checker.py       # Port scanning logic
-├── ip_scanner.py         # IP range generation
-├── logger.py             # Logging system
-├── hosts.txt             # Custom hosts list
-├── icon.ico              # Application icon
-├── README.md             # Project documentation
-└── dist/
-    └── NetworkMonitor.exe
-```
 
 ---
 
 ## ▶️ How to Run (Development Mode)
+
+To run the project without Python:
+
+1. Open the `dist` folder  
+2. Double-click `main.exe`  
+3. The application will run automatically  
+
+📄 Log files are already enabled and will be generated automatically.
 
 Make sure Python 3 is installed:
 
