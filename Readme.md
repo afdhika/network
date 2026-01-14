@@ -21,16 +21,6 @@ The application started as a CLI-based tool and was gradually improved into a **
 - Identify whether services are **OPEN** or **CLOSED**
 - Help simulate basic service availability monitoring
 
-### 🖥️ Graphical User Interface (GUI)
-- Built using **Tkinter**
-- User-friendly interface for non-technical users
-- Scan mode selection:
-  - Hosts file scan
-  - IP range scan
-- Real-time output display
-- Progress bar to indicate scan status
-- Status indicator (IDLE / RUNNING / DONE)
-
 ### ⚙️ Performance & Stability
 - Uses **multithreading** to prevent GUI freezing during scans
 - Configurable delay between scans to avoid network flooding
