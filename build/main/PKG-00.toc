@@ -70,6 +70,7 @@
   ('libffi-8.dll',
    'C:\\Users\\Afdhika\\AppData\\Local\\Programs\\Python\\Python313\\DLLs\\libffi-8.dll',
    'BINARY'),
+  ('hosts.txt', 'C:\\laragon\\www\\network-monitor\\hosts.txt', 'DATA'),
   ('base_library.zip',
    'C:\\laragon\\www\\network-monitor\\build\\main\\base_library.zip',
    'DATA')],
