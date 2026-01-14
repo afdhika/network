@@ -1,11 +1,5 @@
 __pycache__/
-*.pyc
-*.log
-
 dist/
 build/
-
-.env
-venv/
-.idea/
-.vscode/
+*.spec
+network_log.txt
