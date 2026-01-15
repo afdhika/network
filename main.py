@@ -25,7 +25,7 @@ if not os.path.exists(LOG_DIR):
 
 init(autoreset=True)
 
-PORTS = [80, 3306]
+PORTS = [80, 3306, 443]
 
 def main():
     print(Fore.CYAN + "=== Network Monitoring Tool ===")
