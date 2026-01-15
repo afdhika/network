@@ -101,7 +101,12 @@ class NetworkMonitorGUI(tk.Tk):
             if not os.path.exists("hosts.txt"):
                 # Auto-create hosts.txt
                 with open("hosts.txt", "w") as f:
-                    f.write("8.8.8.8\n")
+                    f.write(
+                        "8.8.8.8\n"
+                        "127.0.0.1\n"
+                        "localhost\n"
+                    )
+
 
                 self.log("[INFO] hosts.txt tidak ditemukan, file dibuat otomatis.", "info")
 
