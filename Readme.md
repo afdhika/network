@@ -42,17 +42,23 @@ The application was developed as a **CLI-based tool**, then packaged into a **Wi
 
 ---
 
-## ▶️ How to Run (Development Mode)
+## ▶️ How to Run
 
-To run the project without Python:
+### 🖥️ Run Without Python (Recommended)
+This project is already packaged as a Windows executable.
 
 1. Open the `dist` folder  
-2. Double-click `main.exe`  
-3. The application will run automatically  
+2. Choose one of the following:
+   - `gui.exe` → **GUI version (recommended)**
+   - `main.exe` → CLI version  
+3. Double-click the file to run the application  
 
-📄 Log files are already enabled and will be generated automatically.
+📄 Log files are enabled by default and will be generated automatically.
 
-Make sure Python 3 is installed if you want use python:
+---
+
+### 🐍 Development Mode (Run with Python)
+If you want to run or modify the source code, make sure **Python 3** is installed:
 
 ```bash
 python main.py
