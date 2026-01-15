@@ -8,138 +8,137 @@ import threading
 import time
 import os
 
-PORTS = [80, 3306]
-DELAY = 0.1
+PORTS = [80, 443, 3306] # Menambah port umum 443
+DELAY = 0.05 # Sedikit lebih cepat
 
 class NetworkMonitorGUI(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.title("Network Monitoring Tool")
-        self.geometry("780x580")
-        self.resizable(False, False)
-
-        if os.path.exists("icon.ico"):
-            self.iconbitmap("icon.ico")
-
+        self.title("Network Monitoring Tool v2.0")
+        self.geometry("800x620")
+        
+        # Style Configuration
         self.setup_style()
         self.create_widgets()
+        
+        # Setup Tags untuk warna teks di output
+        self.output.tag_config("up", foreground="#4ade80")   # Hijau
+        self.output.tag_config("down", foreground="#f87171") # Merah
+        self.output.tag_config("port", foreground="#fbbf24") # Kuning
+        self.output.tag_config("info", foreground="#60a5fa") # Biru
 
     def setup_style(self):
         style = ttk.Style(self)
-        style.theme_use("default")
-
-        style.configure("TButton", padding=6)
-        style.configure("Status.TLabel", font=("Segoe UI", 10, "bold"))
+        style.theme_use("clam") # Tema clam lebih fleksibel untuk kustomisasi
+        style.configure("TButton", font=("Segoe UI", 9))
+        style.configure("Main.TFrame", background="#f3f4f6")
 
     def create_widgets(self):
-        top = ttk.Frame(self, padding=10)
-        top.pack(fill="x")
+        # Container Utama
+        main_frame = ttk.Frame(self, padding=20)
+        main_frame.pack(fill="both", expand=True)
 
-        ttk.Label(top, text="Scan Mode:").grid(row=0, column=0, sticky="w")
+        # Header/Input Section
+        input_group = ttk.LabelFrame(main_frame, text=" Configuration ", padding=10)
+        input_group.pack(fill="x", pady=(0, 10))
 
+        ttk.Label(input_group, text="Mode:").grid(row=0, column=0, padx=5, sticky="w")
         self.mode = tk.StringVar(value="range")
-        ttk.Radiobutton(top, text="Hosts File", variable=self.mode, value="file").grid(row=0, column=1)
-        ttk.Radiobutton(top, text="IP Range", variable=self.mode, value="range").grid(row=0, column=2)
+        mode_frame = ttk.Frame(input_group)
+        mode_frame.grid(row=0, column=1, sticky="w")
+        ttk.Radiobutton(mode_frame, text="hosts.txt", variable=self.mode, value="file").pack(side="left", padx=5)
+        ttk.Radiobutton(mode_frame, text="IP Range", variable=self.mode, value="range").pack(side="left", padx=5)
 
-        ttk.Label(top, text="Base IP:").grid(row=1, column=0, sticky="w", pady=5)
-        self.base_ip_entry = ttk.Entry(top, width=20)
+        ttk.Label(input_group, text="Base IP:").grid(row=1, column=0, padx=5, sticky="w")
+        self.base_ip_entry = ttk.Entry(input_group, width=30)
         self.base_ip_entry.insert(0, "192.168.1")
-        self.base_ip_entry.grid(row=1, column=1, columnspan=2, sticky="w")
+        self.base_ip_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-        self.start_button = ttk.Button(top, text="▶ Start Scan", command=self.start_scan)
-        self.start_button.grid(row=2, column=0, pady=10)
+        # Buttons
+        btn_frame = ttk.Frame(input_group)
+        btn_frame.grid(row=2, column=0, columnspan=2, pady=10, sticky="w")
+        
+        self.start_button = ttk.Button(btn_frame, text="▶ Start Scan", command=self.start_scan)
+        self.start_button.pack(side="left", padx=5)
+        
+        ttk.Button(btn_frame, text="🧹 Clear", command=self.clear_output).pack(side="left", padx=5)
 
-        ttk.Button(top, text="🧹 Clear", command=self.clear_output).grid(row=2, column=1)
+        self.status_label = ttk.Label(btn_frame, text="IDLE", font=("Segoe UI", 10, "bold"), foreground="#64748b")
+        self.status_label.pack(side="left", padx=20)
 
-        self.status_label = ttk.Label(top, text="IDLE", style="Status.TLabel", foreground="blue")
-        self.status_label.grid(row=2, column=2)
+        # Progress
+        self.progress = ttk.Progressbar(main_frame, orient="horizontal", mode="determinate")
+        self.progress.pack(fill="x", pady=5)
 
-        self.progress = ttk.Progressbar(self, length=740)
-        self.progress.pack(padx=10, pady=5)
-
+        # Output Terminal
         self.output = tk.Text(
-            self,
-            height=22,
-            bg="#020617",
-            fg="#e5e7eb",
-            insertbackground="white",
-            font=("Consolas", 10)
+            main_frame, height=18, bg="#0f172a", fg="#f8fafc",
+            font=("Consolas", 10), padx=10, pady=10, borderwidth=0
         )
-        self.output.pack(fill="both", padx=10, pady=5)
+        self.output.pack(fill="both", expand=True)
 
-        footer = ttk.Label(
-            self,
-            text="© 2026 Afdhika Syahputra | Network Monitoring Tool",
-            font=("Segoe UI", 9)
-        )
+        # Footer
+        footer = ttk.Label(self, text="© 2026 Afdhika Syahputra | Pro Version", font=("Segoe UI", 8))
         footer.pack(pady=5)
 
-    def log(self, text):
-        self.output.insert(tk.END, text + "\n")
+    def log(self, text, tag=None):
+        self.output.insert(tk.END, text + "\n", tag)
         self.output.see(tk.END)
 
     def clear_output(self):
         self.output.delete(1.0, tk.END)
+        self.progress["value"] = 0
 
     def start_scan(self):
-        self.clear_output()
         self.start_button.config(state="disabled")
-        self.status_label.config(text="RUNNING", foreground="green")
+        self.status_label.config(text="SCANNING...", foreground="#059669")
+        threading.Thread(target=self.scan_logic, daemon=True).start()
 
-        threading.Thread(target=self.scan, daemon=True).start()
-
-    def scan(self):
+    def scan_logic(self):
+        # Ambil Host
         if self.mode.get() == "file":
             try:
                 with open("hosts.txt") as f:
                     hosts = [line.strip() for line in f if line.strip()]
             except FileNotFoundError:
-                messagebox.showerror("Error", "hosts.txt not found")
+                messagebox.showerror("Error", "File hosts.txt tidak ditemukan!")
+                self.reset_ui()
                 return
         else:
-            base_ip = self.base_ip_entry.get().strip()
-            if not base_ip:
-                messagebox.showerror("Error", "Base IP required")
-                return
-            hosts = generate_ip_range(base_ip)
+            base = self.base_ip_entry.get().strip()
+            hosts = generate_ip_range(base)
 
         self.progress["maximum"] = len(hosts)
-        self.progress["value"] = 0
+        self.log(f"--- Scan Started: {len(hosts)} hosts ---", "info")
 
-        self.log("=== Network Monitoring Tool ===")
-        self.log("Starting scan...\n")
-
-        for i, host in enumerate(hosts, start=1):
-            status, time_ms = ping_host(host)
+        for i, host in enumerate(hosts, 1):
+            is_up, time_ms = ping_host(host)
             active = False
 
-            if status:
+            if is_up:
                 active = True
-                self.log(f"[UP] {host} ({time_ms} ms)")
+                self.log(f"[UP] {host} ({time_ms}ms)", "up")
             else:
-                self.log(f"[PING BLOCKED] {host}")
+                self.log(f"[DOWN] {host}", "down")
 
             for port in PORTS:
                 if check_port(host, port):
                     active = True
-                    self.log(f"   └─ Port {port}: OPEN")
-                else:
-                    self.log(f"   └─ Port {port}: CLOSED")
+                    self.log(f"  └ Port {port}: OPEN", "port")
 
-            if active:
-                self.log("   => STATUS: ACTIVE\n")
-                log_result(f"{host} ACTIVE")
-            else:
-                self.log("   => STATUS: INACTIVE\n")
-                log_result(f"{host} INACTIVE")
-
+            # Logging ke file
+            log_result(f"{host} {'ACTIVE' if active else 'INACTIVE'}")
+            
             self.progress["value"] = i
             time.sleep(DELAY)
 
-        self.status_label.config(text="DONE", foreground="purple")
+        self.log("--- Scan Completed ---", "info")
+        self.reset_ui()
+
+    def reset_ui(self):
+        self.status_label.config(text="DONE", foreground="#7c3aed")
         self.start_button.config(state="normal")
-        self.log("Scan completed.")
 
 if __name__ == "__main__":
     app = NetworkMonitorGUI()
