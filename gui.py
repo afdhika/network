@@ -98,13 +98,21 @@ class NetworkMonitorGUI(tk.Tk):
     def scan_logic(self):
         # Ambil Host
         if self.mode.get() == "file":
-            try:
-                with open("hosts.txt") as f:
-                    hosts = [line.strip() for line in f if line.strip()]
-            except FileNotFoundError:
-                messagebox.showerror("Error", "File hosts.txt tidak ditemukan!")
+            if not os.path.exists("hosts.txt"):
+                # Auto-create hosts.txt
+                with open("hosts.txt", "w") as f:
+                    f.write("8.8.8.8\n")
+
+                self.log("[INFO] hosts.txt tidak ditemukan, file dibuat otomatis.", "info")
+
+            with open("hosts.txt") as f:
+                hosts = [line.strip() for line in f if line.strip()]
+
+            if not hosts:
+                self.log("[WARNING] hosts.txt kosong.", "down")
                 self.reset_ui()
                 return
+
         else:
             base = self.base_ip_entry.get().strip()
             hosts = generate_ip_range(base)
