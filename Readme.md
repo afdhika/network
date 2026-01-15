@@ -3,7 +3,7 @@
 Network Monitoring Tool is a **Windows-based network monitoring application** built with Python.  
 This project is designed as a **portfolio project** to demonstrate real-world skills commonly required for **IT Support, Network Engineer, and Junior System Administrator** roles.
 
-The application was developed as a **CLI-based tool**, then packaged into a **Windows executable (.exe)** and distributed using a **Windows installer (setup.exe)**.
+The application started as a **CLI-based tool**, then evolved into a **GUI-based application**, and finally packaged into **Windows executable (.exe)** files for easier usage without requiring Python.
 
 ---
 
@@ -17,9 +17,19 @@ The application was developed as a **CLI-based tool**, then packaged into a **Wi
 ### 🔌 Port Checking
 - Check common service ports such as:
   - HTTP (Port 80)
+  - HTTPS (Port 443)
   - MySQL (Port 3306)
 - Identify whether services are **OPEN** or **CLOSED**
 - Help simulate basic service availability monitoring
+
+### 🖥️ Graphical User Interface (GUI)
+- User-friendly interface built with **Tkinter**
+- Supports:
+  - Hosts scanning from `hosts.txt`
+  - IP range scanning
+- Real-time scan output with color indicators
+- Progress bar and scan status display
+- No terminal interaction required
 
 ### ⚙️ Performance & Stability
 - Uses **multithreading** to speed up scanning tasks
@@ -38,6 +48,7 @@ The application was developed as a **CLI-based tool**, then packaged into a **Wi
 - **Python 3**
 - **Socket & Subprocess** (network operations)
 - **Multithreading**
+- **Tkinter** (GUI)
 - **PyInstaller** (EXE packaging)
 
 ---
@@ -62,6 +73,12 @@ If you want to run or modify the source code, make sure **Python 3** is installe
 
 ```bash
 python main.py
+```
+
+Run GUI version :
+
+```bash
+python gui.py
 ```
 
 ---
