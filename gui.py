@@ -1,15 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ping_checker import ping_host
-from port_checker import check_port
+from port_checker import check_ports, parse_port_input, PORT_PROFILES
 from ip_scanner import generate_ip_range
 from logger import log_result
 import threading
 import time
 import os
 
-PORTS = [80, 443, 3306] # Menambah port umum 443
-DELAY = 0.05 # Sedikit lebih cepat
+DELAY = 0.05
 
 class NetworkMonitorGUI(tk.Tk):
     def __init__(self):
@@ -55,9 +54,22 @@ class NetworkMonitorGUI(tk.Tk):
         self.base_ip_entry.insert(0, "192.168.1")
         self.base_ip_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
+        ttk.Label(input_group, text="Ports:").grid(row=2, column=0, padx=5, sticky="w")
+        port_frame = ttk.Frame(input_group)
+        port_frame.grid(row=2, column=1, padx=5, pady=5, sticky="w")
+        
+        self.port_entry = ttk.Entry(port_frame, width=20)
+        self.port_entry.insert(0, "80,443,3306")
+        self.port_entry.pack(side="left", padx=(0, 5))
+        
+        self.port_profile = ttk.Combobox(port_frame, width=12, values=list(PORT_PROFILES.keys()))
+        self.port_profile.set("custom")
+        self.port_profile.pack(side="left")
+        self.port_profile.bind("<<ComboboxSelected>>", self.on_port_profile_change)
+
         # Buttons
         btn_frame = ttk.Frame(input_group)
-        btn_frame.grid(row=2, column=0, columnspan=2, pady=10, sticky="w")
+        btn_frame.grid(row=3, column=0, columnspan=2, pady=10, sticky="w")
         
         self.start_button = ttk.Button(btn_frame, text="▶ Start Scan", command=self.start_scan)
         self.start_button.pack(side="left", padx=5)
@@ -90,12 +102,31 @@ class NetworkMonitorGUI(tk.Tk):
         self.output.delete(1.0, tk.END)
         self.progress["value"] = 0
 
+    def on_port_profile_change(self, event):
+        profile = self.port_profile.get()
+        if profile in PORT_PROFILES:
+            ports = PORT_PROFILES[profile]
+            self.port_entry.delete(0, tk.END)
+            self.port_entry.insert(0, ",".join(map(str, ports)))
+
     def start_scan(self):
         self.start_button.config(state="disabled")
         self.status_label.config(text="SCANNING...", foreground="#059669")
         threading.Thread(target=self.scan_logic, daemon=True).start()
 
     def scan_logic(self):
+        # Get ports
+        try:
+            port_input = self.port_entry.get().strip()
+            if not port_input:
+                ports = [80, 443, 3306]  # Default
+            else:
+                ports = parse_port_input(port_input)
+        except Exception as e:
+            self.log(f"[ERROR] Invalid port format: {e}", "down")
+            self.reset_ui()
+            return
+
         # Ambil Host
         if self.mode.get() == "file":
             if not os.path.exists("hosts.txt"):
@@ -123,7 +154,7 @@ class NetworkMonitorGUI(tk.Tk):
             hosts = generate_ip_range(base)
 
         self.progress["maximum"] = len(hosts)
-        self.log(f"--- Scan Started: {len(hosts)} hosts ---", "info")
+        self.log(f"--- Scan Started: {len(hosts)} hosts, {len(ports)} ports ---", "info")
 
         for i, host in enumerate(hosts, 1):
             is_up, time_ms = ping_host(host)
@@ -135,8 +166,10 @@ class NetworkMonitorGUI(tk.Tk):
             else:
                 self.log(f"[DOWN] {host}", "down")
 
-            for port in PORTS:
-                if check_port(host, port):
+            # Check ports
+            port_results = check_ports(host, ports)
+            for port, is_open in port_results.items():
+                if is_open:
                     active = True
                     self.log(f"  └ Port {port}: OPEN", "port")
 

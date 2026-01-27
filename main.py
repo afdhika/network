@@ -1,5 +1,5 @@
 from ping_checker import ping_host
-from port_checker import check_port
+from port_checker import check_ports, parse_port_input, PORT_PROFILES
 from logger import log_result
 from ip_scanner import generate_ip_range
 from colorama import Fore, init
@@ -25,14 +25,26 @@ if not os.path.exists(LOG_DIR):
 
 init(autoreset=True)
 
-PORTS = [80, 443, 3306]
-
 def main():
     print(Fore.CYAN + "=== Network Monitoring Tool ===")
     print("1. Scan hosts from hosts.txt")
     print("2. Scan IP range (example: 192.168.1.1 - 254)\n")
 
     choice = input("Choose mode (1/2): ").strip()
+
+    # Port selection
+    print(f"\nAvailable port profiles: {', '.join(PORT_PROFILES.keys())}")
+    port_input = input("Enter ports (e.g: 80,443,3306 or 8000-8100 or 'web'): ").strip()
+    
+    try:
+        if port_input.lower() in PORT_PROFILES:
+            ports = PORT_PROFILES[port_input.lower()]
+            print(f"Using profile '{port_input}': {ports}")
+        else:
+            ports = parse_port_input(port_input) if port_input else [80, 443, 3306]
+    except Exception as e:
+        print(Fore.RED + f"Invalid port format: {e}")
+        return
 
     if choice == "1":
         with open(HOSTS_FILE) as f:
@@ -44,7 +56,7 @@ def main():
         print(Fore.RED + "Invalid choice")
         return
 
-    print("\nStarting scan...\n")
+    print(f"\nStarting scan: {len(hosts)} hosts, {len(ports)} ports...\n")
 
     for host in hosts:
         status, time_ms = ping_host(host)
@@ -56,10 +68,10 @@ def main():
         else:
             print(Fore.RED + f"[PING BLOCKED] {host}")
 
-        for port in PORTS:
-            port_open = check_port(host, port)
-
-            if port_open:
+        # Check ports
+        port_results = check_ports(host, ports)
+        for port, is_open in port_results.items():
+            if is_open:
                 host_active = True
                 print(Fore.YELLOW + f"   └─ Port {port}: OPEN")
             else:
