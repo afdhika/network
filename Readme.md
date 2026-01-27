@@ -80,8 +80,8 @@ This project is already packaged as a Windows executable.
 
 1. Open the `dist` folder  
 2. Choose one of the following:
-   - `gui.exe` → **GUI version (recommended)**
-   - `main.exe` → CLI version  
+   - `Network Scanner.exe` → **GUI version (recommended)**
+   - `Network Scanner CLI.exe` → CLI version  
 3. Double-click the file to run the application  
 
 📄 Log files are enabled by default and will be generated automatically.
@@ -235,11 +235,15 @@ network-monitor/
 ├── gui.py               # GUI version
 ├── ping_checker.py      # Ping functionality
 ├── port_checker.py      # Port scanning (NEW: Custom profiles)
+├── network_info.py      # Network information detection (NEW)
+├── export_utils.py      # Export functionality (NEW)
 ├── ip_scanner.py        # IP range generation
 ├── logger.py            # Logging system
 ├── hosts.txt            # Host list (auto-created)
 ├── logs/                # Scan results directory
 ├── dist/                # Compiled executables
+│   ├── Network Scanner.exe      # GUI executable
+│   └── Network Scanner CLI.exe  # CLI executable
 └── README.md            # This file
 ```
 
