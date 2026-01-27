@@ -4,6 +4,7 @@ from ping_checker import ping_host
 from port_checker import check_ports, parse_port_input, PORT_PROFILES
 from ip_scanner import generate_ip_range
 from logger import log_result
+from export_utils import ExportManager
 import threading
 import time
 import os
@@ -20,6 +21,9 @@ class NetworkMonitorGUI(tk.Tk):
         # Style Configuration
         self.setup_style()
         self.create_widgets()
+        
+        # Initialize export manager
+        self.export_manager = ExportManager()
         
         # Setup Tags untuk warna teks di output
         self.output.tag_config("up", foreground="#4ade80")   # Hijau
@@ -85,6 +89,13 @@ class NetworkMonitorGUI(tk.Tk):
         self.start_button.pack(side="left", padx=5)
         
         ttk.Button(btn_frame, text="🧹 Clear", command=self.clear_output).pack(side="left", padx=5)
+        
+        # Export buttons
+        export_frame = ttk.Frame(btn_frame)
+        export_frame.pack(side="left", padx=10)
+        
+        ttk.Button(export_frame, text="📄 CSV", command=self.export_csv).pack(side="left", padx=2)
+        ttk.Button(export_frame, text="📋 JSON", command=self.export_json).pack(side="left", padx=2)
 
         self.status_label = ttk.Label(btn_frame, text="IDLE", font=("Segoe UI", 10, "bold"), foreground="#64748b")
         self.status_label.pack(side="left", padx=20)
@@ -111,6 +122,7 @@ class NetworkMonitorGUI(tk.Tk):
     def clear_output(self):
         self.output.delete(1.0, tk.END)
         self.progress["value"] = 0
+        self.export_manager.clear_results()
 
     def on_port_profile_change(self, event):
         profile = self.port_profile.get()
@@ -183,6 +195,9 @@ class NetworkMonitorGUI(tk.Tk):
                     active = True
                     self.log(f"  └ Port {port}: OPEN", "port")
 
+            # Save result to export manager
+            self.export_manager.add_result(host, time_ms, port_results, 'ACTIVE' if active else 'INACTIVE')
+
             # Logging ke file
             log_result(f"{host} {'ACTIVE' if active else 'INACTIVE'}")
             
@@ -202,6 +217,19 @@ class NetworkMonitorGUI(tk.Tk):
     def reset_ui(self):
         self.status_label.config(text="DONE", foreground="#7c3aed")
         self.start_button.config(state="normal")
+        
+        # Show summary stats
+        stats = self.export_manager.get_summary_stats()
+        if stats:
+            self.log(f"[SUMMARY] Total: {stats['total_hosts']}, Active: {stats['active_hosts']}, Success Rate: {stats['success_rate']}", "info")
+
+    def export_csv(self):
+        if self.export_manager.export_csv(self):
+            messagebox.showinfo("Export Success", "Results exported to CSV successfully!")
+    
+    def export_json(self):
+        if self.export_manager.export_json(self):
+            messagebox.showinfo("Export Success", "Results exported to JSON successfully!")
 
 if __name__ == "__main__":
     app = NetworkMonitorGUI()
