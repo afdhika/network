@@ -8,7 +8,7 @@ import threading
 import time
 import os
 
-DELAY = 0.05
+DELAY = 0.01  # Faster scanning (10ms per host)
 
 class NetworkMonitorGUI(tk.Tk):
     def __init__(self):
@@ -67,9 +67,19 @@ class NetworkMonitorGUI(tk.Tk):
         self.port_profile.pack(side="left")
         self.port_profile.bind("<<ComboboxSelected>>", self.on_port_profile_change)
 
+        ttk.Label(input_group, text="Delay:").grid(row=3, column=0, padx=5, sticky="w")
+        delay_frame = ttk.Frame(input_group)
+        delay_frame.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        
+        self.delay_var = tk.StringVar(value="10")
+        self.delay_entry = ttk.Entry(delay_frame, width=5, textvariable=self.delay_var)
+        self.delay_entry.pack(side="left", padx=(0, 5))
+        
+        ttk.Label(delay_frame, text="ms").pack(side="left")
+
         # Buttons
         btn_frame = ttk.Frame(input_group)
-        btn_frame.grid(row=3, column=0, columnspan=2, pady=10, sticky="w")
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=10, sticky="w")
         
         self.start_button = ttk.Button(btn_frame, text="▶ Start Scan", command=self.start_scan)
         self.start_button.pack(side="left", padx=5)
@@ -177,7 +187,14 @@ class NetworkMonitorGUI(tk.Tk):
             log_result(f"{host} {'ACTIVE' if active else 'INACTIVE'}")
             
             self.progress["value"] = i
-            time.sleep(DELAY)
+            
+            # Use configurable delay
+            try:
+                delay_ms = float(self.delay_var.get())
+                delay_sec = delay_ms / 1000.0
+                time.sleep(delay_sec)
+            except:
+                time.sleep(0.01)  # Fallback to 10ms
 
         self.log("--- Scan Completed ---", "info")
         self.reset_ui()

@@ -84,7 +84,7 @@ def main():
             print(Fore.RED + "   => STATUS: INACTIVE")
             log_result(f"{host} INACTIVE")
 
-        time.sleep(0.1)
+        time.sleep(0.01)  # Faster scanning
         print()
 
 if __name__ == "__main__":
