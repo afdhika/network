@@ -5,6 +5,7 @@ from port_checker import check_ports, parse_port_input, PORT_PROFILES
 from ip_scanner import generate_ip_range
 from logger import log_result
 from export_utils import ExportManager
+from network_info import NetworkInfo
 import threading
 import time
 import os
@@ -25,11 +26,17 @@ class NetworkMonitorGUI(tk.Tk):
         # Initialize export manager
         self.export_manager = ExportManager()
         
+        # Initialize network info
+        self.network_info = NetworkInfo()
+        
         # Setup Tags untuk warna teks di output
         self.output.tag_config("up", foreground="#4ade80")   # Hijau
         self.output.tag_config("down", foreground="#f87171") # Merah
         self.output.tag_config("port", foreground="#fbbf24") # Kuning
         self.output.tag_config("info", foreground="#60a5fa") # Biru
+        
+        # Initialize network info after UI is ready
+        self.after(100, self.initialize_network_info)
 
     def setup_style(self):
         style = ttk.Style(self)
@@ -42,8 +49,29 @@ class NetworkMonitorGUI(tk.Tk):
         main_frame = ttk.Frame(self, padding=20)
         main_frame.pack(fill="both", expand=True)
 
-        # Header/Input Section
-        input_group = ttk.LabelFrame(main_frame, text=" Configuration ", padding=10)
+        # Network Information Section
+        info_group = ttk.LabelFrame(main_frame, text=" Network Information ", padding=10)
+        info_group.pack(fill="x", pady=(0, 10))
+
+        # Interface selection
+        interface_frame = ttk.Frame(info_group)
+        interface_frame.pack(fill="x", pady=(0, 5))
+        
+        ttk.Label(interface_frame, text="Interface:").pack(side="left", padx=5)
+        self.interface_var = tk.StringVar()
+        self.interface_combo = ttk.Combobox(interface_frame, textvariable=self.interface_var, width=20, state="readonly")
+        self.interface_combo.pack(side="left", padx=5)
+        self.interface_combo.bind("<<ComboboxSelected>>", self.on_interface_change)
+        
+        ttk.Button(interface_frame, text="🔄 Refresh", command=self.refresh_network_info).pack(side="left", padx=5)
+        ttk.Button(interface_frame, text="📋 Copy", command=self.copy_network_info).pack(side="left", padx=5)
+
+        # Network info display
+        self.info_text = tk.Text(info_group, height=3, bg="#f8fafc", fg="#1e293b", font=("Consolas", 9), borderwidth=1)
+        self.info_text.pack(fill="x", pady=5)
+        
+        # Configuration Section
+        input_group = ttk.LabelFrame(main_frame, text=" Scan Configuration ", padding=10)
         input_group.pack(fill="x", pady=(0, 10))
 
         ttk.Label(input_group, text="Mode:").grid(row=0, column=0, padx=5, sticky="w")
@@ -230,6 +258,70 @@ class NetworkMonitorGUI(tk.Tk):
     def export_json(self):
         if self.export_manager.export_json(self):
             messagebox.showinfo("Export Success", "Results exported to JSON successfully!")
+
+    def refresh_network_info(self):
+        """Refresh network information display"""
+        try:
+            # Update interface list
+            self.network_info.refresh_interfaces()
+            self.interface_combo['values'] = self.network_info.interfaces
+            
+            # Select current interface if not set
+            if not self.interface_var.get() and self.network_info.interfaces:
+                self.interface_var.set(self.network_info.interfaces[0])
+            
+            # Get and display network info
+            interface = self.interface_var.get() or self.network_info.current_interface
+            info = self.network_info.get_network_info(interface)
+            
+            # Format and display info
+            info_text = f"🌐 {info['interface']}\n"
+            info_text += f"📍 IP: {info['local_ip']} | 📡 Gateway: {info['gateway']}\n"
+            info_text += f"🔍 DNS: {', '.join(info['dns_servers'][:2])} | 📋 MAC: {info['mac_address'][:8]}..."
+            
+            self.info_text.delete(1.0, tk.END)
+            self.info_text.insert(1.0, info_text)
+            
+            # Auto-fill base IP with local IP range
+            if info['local_ip'] != "Unknown":
+                base_ip = '.'.join(info['local_ip'].split('.')[:-1])
+                self.base_ip_entry.delete(0, tk.END)
+                self.base_ip_entry.insert(0, base_ip)
+            
+        except Exception as e:
+            self.info_text.delete(1.0, tk.END)
+            self.info_text.insert(1.0, f"❌ Error: {str(e)}")
+
+    def on_interface_change(self, event):
+        """Handle interface selection change"""
+        self.refresh_network_info()
+
+    def copy_network_info(self):
+        """Copy network information to clipboard"""
+        try:
+            interface = self.interface_var.get() or self.network_info.current_interface
+            info = self.network_info.get_network_info(interface)
+            
+            copy_text = f"""Network Information:
+Interface: {info['interface']}
+Local IP: {info['local_ip']}
+Subnet Mask: {info['subnet_mask']}
+Gateway: {info['gateway']}
+DNS Servers: {', '.join(info['dns_servers'])}
+MAC Address: {info['mac_address']}
+Network Range: {self.network_info.get_network_range(interface)}"""
+            
+            if self.network_info.copy_to_clipboard(copy_text):
+                messagebox.showinfo("Success", "Network information copied to clipboard!")
+            else:
+                messagebox.showwarning("Warning", "Failed to copy to clipboard")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to copy: {str(e)}")
+
+    def initialize_network_info(self):
+        """Initialize network info on startup"""
+        self.refresh_network_info()
 
 if __name__ == "__main__":
     app = NetworkMonitorGUI()

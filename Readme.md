@@ -30,6 +30,14 @@ The application started as a **CLI-based tool**, then evolved into a **GUI-based
   - Combined: `80,443,8000-8100`
 - Real-time port status detection (OPEN/CLOSED)
 
+### 🌐 Network Information Display ⭐ *NEW*
+- **Real-time network configuration** - Detect current network settings
+- **Multi-interface support** - Switch between Wi-Fi, Ethernet, etc.
+- **System integration** - Pulls data from Windows/Linux/Mac network configuration
+- **Auto IP detection** - Automatically fills base IP from current network
+- **Copy to clipboard** - Easy sharing of network details
+- **Cross-platform** - Works on Windows, Linux, and macOS
+
 ### 🖥️ Enhanced Graphical User Interface (GUI)
 - User-friendly interface built with **Tkinter**
 - **Interactive port selection** with dropdown profiles and custom input
@@ -108,7 +116,13 @@ python gui.py
    - Select from dropdown: `web`, `database`, `mail`, `ftp`, `remote`, `all`
    - Or enter custom ports: `80,443,8080` or `8000-8100`
 
-3. **Start Scanning**:
+3. **View Network Information**:
+   - Check your current network configuration at the top
+   - Switch between different network interfaces (Wi-Fi, Ethernet)
+   - Copy network details to clipboard for sharing
+   - Base IP auto-fills from your current network
+
+4. **Start Scanning**:
    - Click "▶ Start Scan" to begin
    - Monitor real-time results
    - View progress and status
@@ -140,7 +154,62 @@ Follow the interactive prompts:
 
 ---
 
-## 🎯 Use Case Scenarios
+## � Network Information Explained
+
+### 📡 What is Network Information?
+
+The **Network Information Display** shows your **current network configuration**, not scan results. Think of it as your computer's "network ID card."
+
+### 🔍 How It Works
+
+**Data Sources:**
+- **System Configuration** - Windows/Linux/Mac network settings
+- **Network Adapters** - Physical hardware information
+- **Router/ISP** - Gateway and DNS settings
+- **IP Protocol** - Socket-based detection
+
+### 📋 What Each Field Means
+
+| Field | Source | Example | Purpose |
+|-------|--------|---------|---------|
+| **Interface** | Network adapter name | `Wi-Fi`, `Ethernet` | Select which network to use |
+| **Local IP** | System IP configuration | `192.168.1.100` | Your computer's address |
+| **Gateway** | Router configuration | `192.168.1.1` | Your network's exit point |
+| **DNS Servers** | System DNS settings | `8.8.8.8`, `1.1.1.1` | Domain name resolution |
+| **MAC Address** | Hardware identifier | `00:11:22:33:44:55` | Unique device ID |
+
+### 🎯 Key Differences
+
+| Network Information | Scan Results |
+|-------------------|-------------|
+| **Static** configuration | **Dynamic** discovery |
+| Your computer's settings | Other devices on network |
+| Changes when you move networks | Changes when devices go online/offline |
+| Like your home address | Like neighborhood directory |
+
+### 💡 Practical Uses
+
+**Network Information helps you:**
+- **Auto-fill IP ranges** - Base IP automatically set
+- **Troubleshoot connectivity** - Check gateway/DNS issues
+- **Share network details** - Copy for IT support
+- **Switch interfaces** - Use Wi-Fi vs Ethernet
+- **Verify configuration** - Ensure correct settings
+
+### 🔄 When Does It Change?
+
+**Network info updates when:**
+- **Connect to different network** (new Wi-Fi, office, cafe)
+- **Switch network adapters** (Wi-Fi ↔ Ethernet)
+- **Router restart** (gateway may change)
+- **ISP configuration change** (DNS updates)
+- **System network reset** (IP reassignment)
+
+**Note:** Network info is **not affected** by scanning other devices. It shows **your** computer's network configuration.
+
+---
+
+## � Use Case Scenarios
 
 This application simulates tasks such as:
 - **Network Discovery**: Find active devices in a local network
@@ -182,6 +251,8 @@ network-monitor/
 - **Custom Port Profiles**: Pre-configured port sets for different services
 - **Flexible Port Input**: Support for ranges, comma-separated values, and profiles
 - **Enhanced GUI**: Interactive port selection with dropdown
+- **Network Information Display**: Real-time network configuration detection
+- **Export Functionality**: CSV/JSON export with metadata
 - **Better Error Handling**: Invalid input detection and user-friendly messages
 - **Improved CLI**: Interactive port selection with profile hints
 
@@ -228,10 +299,9 @@ Indonesia 🇮🇩
 
 ## 📋 Future Roadmap
 
-- [ ] **Export Results**: CSV/JSON export functionality
 - [ ] **Real-time Monitoring**: Auto-scan with desktop notifications
-- [ ] **Network Information**: Local IP, subnet mask, gateway detection
+- [ ] **Network Performance Metrics**: Response time graphs and statistics
 - [ ] **DNS Tools**: DNS lookup and reverse DNS
-- [ ] **Performance Metrics**: Response time graphs and statistics
 - [ ] **Dark/Light Theme**: UI theme customization
 - [ ] **Configuration Files**: Save/load scan profiles
+- [ ] **Advanced Filters**: Filter scan results by status, ports, etc.
